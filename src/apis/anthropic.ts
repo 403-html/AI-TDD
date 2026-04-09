@@ -4,12 +4,13 @@ import OpenAI from "openai";
 import { outro } from "@clack/prompts";
 
 import { getConfig } from "../commands/config";
+import { ANTHROPIC_MODELS } from "../models";
 import { outroError } from "../utils/prompts";
 
 const config = getConfig();
 
 const ANTHROPIC_API_KEY = config?.ANTHROPIC_API_KEY;
-const MODEL = config?.MODEL ?? "claude-sonnet-4-6";
+const MODEL = config?.MODEL ?? ANTHROPIC_MODELS.CLAUDE_SONNET_4_6;
 
 // ---------------------------------------------------------------------------
 // Translation helpers: OpenAI format → Anthropic format

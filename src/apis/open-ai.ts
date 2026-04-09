@@ -2,7 +2,7 @@ import OpenAI from "openai";
 
 import { outro } from "@clack/prompts";
 
-import { getConfig } from "../commands/config";
+import { DEFAULT_MODEL, getConfig } from "../commands/config";
 import { outroError } from "../utils/prompts";
 
 const config = getConfig();
@@ -29,7 +29,7 @@ async function createChatCompletion(
   }
 
   const params: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming = {
-    model: MODEL ?? "gpt-4o",
+    model: MODEL ?? DEFAULT_MODEL,
     messages,
     tools,
     temperature: 1,

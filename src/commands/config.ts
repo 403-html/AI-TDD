@@ -5,6 +5,7 @@ import { parse as iniParse, stringify as iniStringify } from "ini";
 import { homedir } from "os";
 import { join as pathJoin } from "path";
 import { getI18nLocal } from "../i18n";
+import { ANTHROPIC_MODELS, OPENAI_MODELS } from "../models";
 import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
 
@@ -17,7 +18,7 @@ export enum CONFIG_KEYS {
   LANGUAGE = "LANGUAGE",
 }
 
-export const DEFAULT_MODEL = "gpt-5.4";
+export const DEFAULT_MODEL = OPENAI_MODELS.GPT_5_4;
 export const DEFAULT_MODEL_TOKEN_LIMIT = 100_000;
 
 enum CONFIG_COMMAND_MODES {
@@ -82,8 +83,8 @@ export const configValidators = {
       CONFIG_KEYS.MODEL,
       typeof value === "string" && value.length > 0,
       "Must be a non-empty model name. " +
-        "OpenAI: gpt-5.4 (default), gpt-5.4-mini, gpt-5.4-nano. " +
-        "Anthropic: claude-sonnet-4-6, claude-sonnet-4-5, claude-opus-4-5, claude-haiku-4-5. " +
+        `OpenAI: ${OPENAI_MODELS.GPT_5_4} (default), ${OPENAI_MODELS.GPT_5_4_MINI}, ${OPENAI_MODELS.GPT_5_4_NANO}. ` +
+        `Anthropic: ${ANTHROPIC_MODELS.CLAUDE_SONNET_4_6}, ${ANTHROPIC_MODELS.CLAUDE_SONNET_4_5}, ${ANTHROPIC_MODELS.CLAUDE_OPUS_4_5}, ${ANTHROPIC_MODELS.CLAUDE_HAIKU_4_5}. ` +
         "Ollama/local: qwen3:30b, qwen3:7b, deepseek-coder-v2, codellama (requires BASE_URL)."
     );
 
