@@ -14,7 +14,6 @@ import { COMMANDS } from "./enums";
 export const runCommand = command(
   {
     name: COMMANDS.run,
-    // parameters: ["<mode>", "<key=values...>"],
   },
   async (argv) => {
     intro("aitdd is spinning 🪩");

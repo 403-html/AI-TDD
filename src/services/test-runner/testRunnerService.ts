@@ -1,7 +1,3 @@
-/*
-    This service runs test(s)
-*/
-
 import { note } from "@clack/prompts";
 import { getConfig } from "src/commands/config";
 import { exe } from "../../utils/shell";
@@ -28,7 +24,6 @@ class TestRunnerService {
 
   getMessage(stdout: string) {
     // TODO: extract any helpful message, cut logs
-
     return stdout;
   }
 

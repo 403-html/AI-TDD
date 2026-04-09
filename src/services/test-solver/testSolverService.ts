@@ -1,5 +1,3 @@
-/* This service tries to solve a test file */
-
 import { isCancel, select } from "@clack/prompts";
 import chalk from "chalk";
 import OpenAI from "openai";
