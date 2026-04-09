@@ -175,3 +175,33 @@ aitdd run
 You pay for your own requests to the provider API. AITDD uses `gpt-5.4` by default — check [OpenAI pricing](https://openai.com/pricing). For a zero-cost option run a local model with [Ollama](https://ollama.com/) (see Setup above).
 
 The original project noted that ChatGPT (the web model) could not solve tests reliably. With today's tool-use capable models (GPT-4o, Claude 3.5+, Qwen 3) the results are dramatically better — that limitation no longer applies.
+
+## What we want to improve
+
+🔴 **Critical fixes**
+
+1. ~~Replace stale model list with current ones; default to a mini model~~ ✅
+2. Loosen API key validation — drop the `sk-` prefix check, accept any non-empty string
+3. ~~Replace fragile line-based `write_code` with `write_file(path, content)` + `read_file(path)` tools~~ ✅
+4. Sanitize or replace unsafe shell-based grep/find/awk with safe in-process equivalents
+
+🟡 **High-value new capabilities**
+
+5. ~~Add multi-provider support: Anthropic, Ollama, OpenRouter via `BASE_URL` config~~ ✅
+6. Add reasoning-model support (o-series / Claude extended thinking) behind a `REASONING` config flag
+7. Stream model tokens to stdout instead of blocking on the full response
+8. Auto-include files imported by the test; pass full directory tree as context
+9. ~~Add `read_file(path)` as a first-class tool — model shouldn't need grep to read files~~ ✅
+10. Enforce well-formed file edits via structured output / JSON schema
+
+🟢 **Developer experience**
+
+11. Auto-detect test runner from `package.json` scripts and prompt the user to confirm
+12. Make `aitdd init` interactive: provider → API key → model → test command wizard
+13. Expose `MAX_ATTEMPTS` as a config key; add a per-run token-cost tracker
+14. Offer to `git commit` the passing solution with an auto-generated message
+15. Support `aitdd run --all` to solve multiple test files in sequence or parallel
+
+🔵 **Longer-term / research**
+
+16. Replace flat message context with a plan → act → observe → reflect agentic loop
