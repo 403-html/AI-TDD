@@ -1,5 +1,3 @@
-/* This service manipulates code: replaces, prepends, appends lines */
-
 import fs from "node:fs/promises";
 
 interface IContent {
@@ -58,8 +56,8 @@ class FileManipulator {
     return text;
   }
 
-  // TODO: make this async write in place for better performance
   manipulateFileContent(currentContent: string, newContent: IContent) {
+    // TODO: make this async write in place for better performance
     const lines = currentContent.split("\n");
     const newLines: string[] = [];
     for (const line of lines) {

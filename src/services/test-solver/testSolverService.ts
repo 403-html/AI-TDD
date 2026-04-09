@@ -1,5 +1,3 @@
-/* This service tries to solve a test file */
-
 import { isCancel, select } from "@clack/prompts";
 import chalk from "chalk";
 import OpenAI from "openai";
@@ -49,8 +47,6 @@ class TestSolverService {
       try {
         const args = JSON.parse(tool.function.arguments);
 
-        // TODO: sanitize directory, namePattern, and type...
-
         switch (tool.function.name) {
           case "awk": {
             const { pattern, filePath } = args;
@@ -69,12 +65,15 @@ class TestSolverService {
           case "grep": {
             const { pattern, filePath, flags } = args;
 
-            const flagString = flags.join(" ");
+            const safeFlags: string[] = Array.isArray(flags)
+              ? flags.filter((f: unknown) => typeof f === "string" && /^-[a-zA-Z]+$/.test(f))
+              : [];
+
             const { stdout } = await exe([
               "grep",
+              ...safeFlags,
               pattern,
               filePath,
-              flagString,
             ]);
 
             outputs.push({
@@ -89,13 +88,19 @@ class TestSolverService {
           case "find": {
             const { directory, namePattern, type } = args;
 
-            const typeFlag = type === "file" ? "-type f" : "-type d";
+            const typeArgs =
+              type === "file"
+                ? ["-type", "f"]
+                : type === "directory"
+                ? ["-type", "d"]
+                : [];
+
             const { stdout } = await exe([
               "find",
               directory,
               "-name",
               namePattern,
-              typeFlag,
+              ...typeArgs,
             ]);
 
             outputs.push({
@@ -107,25 +112,32 @@ class TestSolverService {
             break;
           }
 
-          case "write_code": {
-            const { modifications } = args as {
-              modifications: Array<{
-                filePath: string;
-                content: {
-                  row: string;
-                  action: "replace" | "append" | "prepend";
-                  with: string;
-                }[];
-              }>;
-            };
+          case "read_file": {
+            const { filePath } = args as { filePath: string };
 
-            const response = await fileManipulator.manage(modifications);
+            const content = await fileManipulator.readFileContent(filePath);
 
             outputs.push({
               callId: tool.id,
               name: tool.function.name,
-              content:
-                response.reduce((acc, result) => `${acc}\n${result}`, "") ?? "",
+              content: content ?? `File not found: ${filePath}`,
+            });
+
+            break;
+          }
+
+          case "write_file": {
+            const { filePath, content } = args as {
+              filePath: string;
+              content: string;
+            };
+
+            await fileManipulator.writeFile(filePath, content);
+
+            outputs.push({
+              callId: tool.id,
+              name: tool.function.name,
+              content: `${filePath}: written successfully`,
             });
 
             break;

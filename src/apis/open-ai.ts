@@ -1,64 +1,52 @@
-import axios from "axios";
 import OpenAI from "openai";
 
 import { outro } from "@clack/prompts";
 
-import { DEFAULT_MODEL_TOKEN_LIMIT, getConfig } from "../commands/config";
+import { DEFAULT_MODEL, getConfig } from "../commands/config";
 import { outroError } from "../utils/prompts";
-// import { tokenCount } from "../utils/token-count";
 
 const config = getConfig();
 
 const OPENAI_API_KEY = config?.OPENAI_API_KEY;
+const BASE_URL: string | undefined = config?.BASE_URL || undefined;
+const MODEL = config?.MODEL;
 
-if (!OPENAI_API_KEY) {
-  outro(
-    "OPENAI_API_KEY is not set, please run `aitdd config set OPENAI_API_KEY=<your token>. Make sure you add payment details, so API works.`"
-  );
-  outro("For help look into README https://github.com/di-sukharev/aitdd#setup");
-
-  process.exit(1);
-}
-
-const MODEL = config.MODEL;
-
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY ?? "missing",
+  baseURL: BASE_URL,
+});
 
 async function createChatCompletion(
   messages: Array<OpenAI.Chat.ChatCompletionMessageParam>,
-  tools: Array<OpenAI.ChatCompletionTool>
+  tools: Array<OpenAI.ChatCompletionTool> = []
 ): Promise<OpenAI.Chat.Completions.ChatCompletionMessage> {
-  const params = {
-    model: MODEL,
+  if (!OPENAI_API_KEY) {
+    outro(
+      "OPENAI_API_KEY is not set. Run `aitdd config set OPENAI_API_KEY <key>`. For Anthropic models set ANTHROPIC_API_KEY instead."
+    );
+    outro("For help look into README https://github.com/403-html/AI-TDD#setup");
+    process.exit(1);
+  }
+
+  const params: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming = {
+    model: MODEL ?? DEFAULT_MODEL,
     messages,
     tools,
     temperature: 1,
     top_p: 0.1,
-    // max_tokens: DEFAULT_MODEL_TOKEN_LIMIT,
   };
 
   try {
     const completion = await openai.chat.completions.create(params);
-
-    const message = completion.choices[0].message;
-
-    return message;
+    return completion.choices[0].message;
   } catch (error) {
-    outroError(JSON.stringify(params));
+    const err = error as Error & { status?: number; error?: { message: string } };
 
-    const err = error as Error;
     outroError(err.message);
 
-    if (
-      axios.isAxiosError<{ error?: { message: string } }>(error) &&
-      error.response?.status === 401
-    ) {
-      const openAiError = error.response.data.error;
-
-      if (openAiError?.message) outro(openAiError.message);
-      outro(
-        "For help look into README https://github.com/di-sukharev/aitdd#setup"
-      );
+    if (err.status === 401) {
+      if (err.error?.message) outro(err.error.message);
+      outro("For help look into README https://github.com/403-html/AI-TDD#setup");
     }
 
     throw err;

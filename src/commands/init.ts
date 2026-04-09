@@ -5,7 +5,6 @@ import { COMMANDS } from "./enums";
 export const initCommand = command(
   {
     name: COMMANDS.init,
-    // parameters: ["<mode>", "<key=values...>"],
   },
   async (argv) => {
     intro("aitdd is initializing 🐣");

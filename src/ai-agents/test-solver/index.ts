@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 import { spinner } from "@clack/prompts";
-import { OpenAiApi } from "../../apis/open-ai";
+import { LlmApi } from "../../apis/llm";
 import { FileWithCode } from "../../types";
 import { FUNCTIONS } from "./functions";
 
@@ -12,74 +12,63 @@ interface Props {
   context?: Array<OpenAI.Chat.ChatCompletionMessageParam>;
 }
 
+export function buildTestSolverPrompt(
+  test: FileWithCode,
+  error: string,
+  files: FileWithCode[] = []
+): Array<OpenAI.Chat.ChatCompletionMessageParam> {
+  return [
+    {
+      role: "system",
+      content: [
+        "You are an autoregressive language model fine-tuned with instruction-tuning and RLHF.",
+        "Each token you produce is another opportunity to use computation, so you always spend a few sentences explaining background context, assumptions, and step-by-step thinking BEFORE you write any code.",
+        "You act as an AI agent that writes production-ready code to make tests pass, following Test-Driven Development (TDD) practices.",
+        "I will send you a test suite together with the error output from running it. Recognise the tech stack, reason about what implementation is required, then write the source files needed to make every test pass.",
+        "Use read_file to inspect any existing files before modifying them. Use write_file to write the complete, final content of each file you create or change.",
+        "Adhere strictly to TDD: write exactly the code the tests require — robust, efficient, and no more than necessary.",
+      ].join("\n"),
+    },
+    {
+      role: "user",
+      content: [
+        `Below is the '${test.path}' content:`,
+        "```",
+        test.code,
+        "```",
+        "",
+        `This is a stderr for the '${test.path}' run:`,
+        "```",
+        error,
+        "```",
+        "",
+        ...files.map((file) => [
+          `This is the '${file.path}' content:`,
+          "```",
+          file.code,
+          "```",
+          "",
+        ]),
+        "",
+        "Make the tests pass.",
+      ].join("\n"),
+    },
+  ];
+}
+
+export const TEST_SOLVER_TOOLS: OpenAI.ChatCompletionTool[] = [
+  { type: "function", function: FUNCTIONS.AWK },
+  { type: "function", function: FUNCTIONS.GREP },
+  { type: "function", function: FUNCTIONS.FIND },
+  { type: "function", function: FUNCTIONS.READ_FILE },
+  { type: "function", function: FUNCTIONS.WRITE_FILE },
+];
+
 class TestSolverAgent {
-  private getChatCompletionPrompt(
-    test: FileWithCode,
-    error: string,
-    files: FileWithCode[] = []
-  ): Array<OpenAI.Chat.ChatCompletionMessageParam> {
-    return [
-      {
-        role: "system",
-        content: [
-          "You are autoregressive language model that has been fine-tuned with instruction-tuning and RLHF, each token you produce is another opportunity to use computation, therefore you always spend a few sentences explaining background context, assumptions, and step-by-step thinking BEFORE you try to respond.",
-          "You are to act as an AI agent that solves tests in REPL mode as per the Test-Driven Development (TDD) practices.",
-          "I send you a test suite code, then you recognize the tech stack and generate production ready code to pass all the tests.",
-          "Adhere strictly to Test-Driven Development (TDD) practices, ensuring that all code written is robust, efficient, and passes the tests.",
-        ].join("\n"),
-      },
-      {
-        role: "user",
-        content: [
-          `Below is the '${test.path}' content:`,
-          "```",
-          test.code,
-          "```",
-          "",
-          `This is a stderr for the '${test.path}' run:`,
-          "```",
-          error,
-          "```",
-          "",
-          ...files.map((file) => [
-            `This is the '${file.path}' content:`,
-            "```",
-            file.code,
-            "```",
-            "",
-          ]),
-          "",
-          "Make the tests pass.",
-        ].join("\n"),
-      },
-    ];
-  }
-
-  async callOpenAi({ testFile, relevantFiles, error, context = [] }: Props) {
-    const prompt = this.getChatCompletionPrompt(testFile, error, relevantFiles);
-
+  async callLlm({ testFile, relevantFiles, error, context = [] }: Props) {
+    const prompt = buildTestSolverPrompt(testFile, error, relevantFiles);
     const chat = [...prompt, ...context];
-
-    const message = await OpenAiApi.createChatCompletion(chat, [
-      {
-        type: "function",
-        function: FUNCTIONS.AWK,
-      },
-      {
-        type: "function",
-        function: FUNCTIONS.GREP,
-      },
-      {
-        type: "function",
-        function: FUNCTIONS.FIND,
-      },
-      {
-        type: "function",
-        function: FUNCTIONS.WRITE_CODE,
-      },
-    ]);
-
-    return message;
+    return LlmApi.createChatCompletion(chat, TEST_SOLVER_TOOLS);
   }
 
   async solve({
@@ -91,18 +80,18 @@ class TestSolverAgent {
     const loader = spinner();
 
     try {
-      loader.start("GPT is solving the test");
-      const message = await this.callOpenAi({
+      loader.start("AI is solving the test");
+      const message = await this.callLlm({
         testFile,
         relevantFiles,
         error,
         context,
       });
 
-      loader.stop("GPT has an idea, applying 🔧🪛🔨");
+      loader.stop("AI has an idea, applying 🔧🪛🔨");
 
       // TODO: stream to stdout
-      console.info(message.content!);
+      if (message.content) console.info(message.content);
 
       return message;
     } catch (error) {
