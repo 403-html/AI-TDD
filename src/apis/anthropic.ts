@@ -15,7 +15,7 @@ const MODEL = config?.MODEL ?? "claude-sonnet-4-6";
 // Translation helpers: OpenAI format → Anthropic format
 // ---------------------------------------------------------------------------
 
-function toAnthropicTools(
+export function toAnthropicTools(
   tools: OpenAI.ChatCompletionTool[]
 ): Anthropic.Tool[] {
   return tools.map((tool) => ({
@@ -25,7 +25,7 @@ function toAnthropicTools(
   }));
 }
 
-function toAnthropicMessages(
+export function toAnthropicMessages(
   messages: OpenAI.Chat.ChatCompletionMessageParam[]
 ): { system: string; messages: Anthropic.MessageParam[] } {
   let system = "";
@@ -107,7 +107,7 @@ function toAnthropicMessages(
 // Translation helper: Anthropic response → OpenAI message format
 // ---------------------------------------------------------------------------
 
-function toOpenAiMessage(
+export function toOpenAiMessage(
   response: Anthropic.Message
 ): OpenAI.Chat.Completions.ChatCompletionMessage {
   let textContent = "";
