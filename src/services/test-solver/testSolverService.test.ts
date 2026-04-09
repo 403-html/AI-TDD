@@ -23,7 +23,7 @@ const mockExe = mock(async (_args: string[]) => ({
 
 mock.module("src/utils/shell", () => ({ exe: mockExe }));
 
-const mockReadFileContent = mock(async (_path: string) => "file contents");
+const mockReadFileContent = mock(async (_path: string): Promise<string | null> => "file contents");
 const mockWriteFile = mock(async (_path: string, _content: string) => {});
 
 mock.module("../file-manipulator/fileManipulatorService", () => ({
@@ -73,7 +73,8 @@ describe("TestSolverService.callTools", () => {
       const [out] = await testSolver.callTools([
         makeTool("read_file", { filePath: "src/x.ts" }),
       ]);
-      expect(mockReadFileContent).toHaveBeenCalledWith("src/x.ts");
+      expect(mockReadFileContent).toHaveBeenCalledTimes(1);
+      (expect(mockReadFileContent) as any).toHaveBeenCalledWith("src/x.ts");
       expect(out.name).toBe("read_file");
       expect(out.content).toBe("export const x = 1;");
       expect(out.callId).toBe("call_read_file");
@@ -95,7 +96,8 @@ describe("TestSolverService.callTools", () => {
       const [out] = await testSolver.callTools([
         makeTool("write_file", { filePath: "src/out.ts", content: "const y = 2;" }),
       ]);
-      expect(mockWriteFile).toHaveBeenCalledWith("src/out.ts", "const y = 2;");
+      expect(mockWriteFile).toHaveBeenCalledTimes(1);
+      (expect(mockWriteFile) as any).toHaveBeenCalledWith("src/out.ts", "const y = 2;");
       expect(out.name).toBe("write_file");
       expect(out.content).toContain("written successfully");
       expect(out.content).toContain("src/out.ts");

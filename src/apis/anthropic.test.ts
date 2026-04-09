@@ -171,7 +171,7 @@ describe("toAnthropicMessages", () => {
 // ---------------------------------------------------------------------------
 
 describe("toOpenAiMessage", () => {
-  function makeResponse(content: Anthropic.ContentBlock[]): Anthropic.Message {
+  function makeResponse(content: any[]): Anthropic.Message {
     return {
       id: "msg_1",
       type: "message",
@@ -180,8 +180,8 @@ describe("toOpenAiMessage", () => {
       model: "claude-sonnet-4-6",
       stop_reason: "end_turn",
       stop_sequence: null,
-      usage: { input_tokens: 10, output_tokens: 20 },
-    };
+      usage: { input_tokens: 10, output_tokens: 20 } as Anthropic.Message["usage"],
+    } as unknown as Anthropic.Message;
   }
 
   test("maps a text-only response to content string", () => {

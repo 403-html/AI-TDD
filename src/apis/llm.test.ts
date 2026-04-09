@@ -53,6 +53,7 @@ describe("LlmApi — provider routing", () => {
     // Patch the module-level config reference by re-importing with a new env.
     // The simplest testable path: create a fresh import with MODEL=claude-sonnet-4-6.
     process.env.MODEL = "claude-sonnet-4-6";
+    // @ts-expect-error — Bun-specific cache-busting query param not understood by tsc
     const { LlmApi: ClaudeLlm } = await import("./llm?t=claude");
     await ClaudeLlm.createChatCompletion(messages, []);
     expect(anthropicMock).toHaveBeenCalledTimes(1);
@@ -62,6 +63,7 @@ describe("LlmApi — provider routing", () => {
 
   test("routes non-claude models to OpenAiApi", async () => {
     process.env.MODEL = "gpt-4o";
+    // @ts-expect-error — Bun-specific cache-busting query param not understood by tsc
     const { LlmApi: GptLlm } = await import("./llm?t=gpt");
     await GptLlm.createChatCompletion(messages, []);
     expect(openaiMock).toHaveBeenCalledTimes(1);
@@ -71,6 +73,7 @@ describe("LlmApi — provider routing", () => {
 
   test("routes gpt-5-codex to OpenAiApi", async () => {
     process.env.MODEL = "gpt-5-codex";
+    // @ts-expect-error — Bun-specific cache-busting query param not understood by tsc
     const { LlmApi: CodexLlm } = await import("./llm?t=codex");
     await CodexLlm.createChatCompletion(messages, []);
     expect(openaiMock).toHaveBeenCalledTimes(1);
@@ -80,6 +83,7 @@ describe("LlmApi — provider routing", () => {
 
   test("passes messages and tools through to the chosen provider", async () => {
     process.env.MODEL = "gpt-4o";
+    // @ts-expect-error — Bun-specific cache-busting query param not understood by tsc
     const { LlmApi: PassthroughLlm } = await import("./llm?t=passthrough");
     const tools: OpenAI.ChatCompletionTool[] = [
       {
@@ -91,7 +95,7 @@ describe("LlmApi — provider routing", () => {
       },
     ];
     await PassthroughLlm.createChatCompletion(messages, tools);
-    expect(openaiMock).toHaveBeenCalledWith(messages, tools);
+    (expect(openaiMock) as any).toHaveBeenCalledWith(messages, tools);
     delete process.env.MODEL;
   });
 });
