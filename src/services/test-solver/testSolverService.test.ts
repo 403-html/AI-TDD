@@ -34,11 +34,7 @@ mock.module("../file-manipulator/fileManipulatorService", () => ({
 }));
 
 // Also mock the agent so callTools tests don't trigger LLM calls
-mock.module("../../ai-agents/test-solver", () => ({
-  testSolverAgent: {
-    solve: mock(async () => ({ role: "assistant", content: "ok" })),
-  },
-}));
+// (not needed — callTools does not use testSolverAgent directly)
 
 const { testSolver } = await import("./testSolverService");
 

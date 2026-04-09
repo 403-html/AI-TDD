@@ -30,8 +30,8 @@ function restoreExitAndOutput() {
 // ---------------------------------------------------------------------------
 
 describe("DEFAULT_MODEL", () => {
-  test("is gpt-4o", () => {
-    expect(DEFAULT_MODEL).toBe("gpt-4o");
+  test("is gpt-5.4", () => {
+    expect(DEFAULT_MODEL).toBe("gpt-5.4");
   });
 });
 
@@ -124,12 +124,9 @@ describe("configValidators.MODEL", () => {
   afterEach(restoreExitAndOutput);
 
   test("accepts current OpenAI models", () => {
-    expect(configValidators[CONFIG_KEYS.MODEL]("gpt-4o")).toBe("gpt-4o");
-    expect(configValidators[CONFIG_KEYS.MODEL]("gpt-4o-mini")).toBe("gpt-4o-mini");
-    expect(configValidators[CONFIG_KEYS.MODEL]("gpt-4.1")).toBe("gpt-4.1");
-    expect(configValidators[CONFIG_KEYS.MODEL]("gpt-5-codex")).toBe("gpt-5-codex");
-    expect(configValidators[CONFIG_KEYS.MODEL]("o3")).toBe("o3");
-    expect(configValidators[CONFIG_KEYS.MODEL]("o4-mini")).toBe("o4-mini");
+    expect(configValidators[CONFIG_KEYS.MODEL]("gpt-5.4")).toBe("gpt-5.4");
+    expect(configValidators[CONFIG_KEYS.MODEL]("gpt-5.4-mini")).toBe("gpt-5.4-mini");
+    expect(configValidators[CONFIG_KEYS.MODEL]("gpt-5.4-nano")).toBe("gpt-5.4-nano");
   });
 
   test("accepts Anthropic Claude models", () => {

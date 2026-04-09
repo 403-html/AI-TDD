@@ -202,7 +202,7 @@ describe("toOpenAiMessage", () => {
       },
     ]);
     const msg = toOpenAiMessage(response);
-    expect(msg.content).toBe("");
+    expect(msg.content).toBeNull();
     expect(msg.tool_calls).toHaveLength(1);
     expect(msg.tool_calls![0]).toMatchObject({
       id: "call_abc",

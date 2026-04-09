@@ -28,7 +28,7 @@ AITDD runs on [Bun](https://bun.sh/), make sure you first install the latest Bun
 
 2. Choose a provider and set your API key:
 
-   **OpenAI** (default — `gpt-4o`)
+   **OpenAI** (default — `gpt-5.4`)
    ```sh
    aitdd config set OPENAI_API_KEY <your_openai_key>
    ```
@@ -66,7 +66,7 @@ AITDD runs on [Bun](https://bun.sh/), make sure you first install the latest Bun
 
 | Provider  | Recommended models |
 |-----------|--------------------|
-| OpenAI    | `gpt-4o` (default), `gpt-4o-mini`, `gpt-4.1`, `gpt-4.1-mini`, `gpt-5-codex`, `o3`, `o4-mini` |
+| OpenAI    | `gpt-5.4` (default), `gpt-5.4-mini`, `gpt-5.4-nano` |
 | Anthropic | `claude-sonnet-4-6`, `claude-sonnet-4-5`, `claude-opus-4-5`, `claude-haiku-4-5` |
 | Ollama    | `qwen3:30b`, `qwen3:7b`, `deepseek-coder-v2`, `codellama` (any model name Ollama serves) |
 | OpenRouter | any model ID from [openrouter.ai/models](https://openrouter.ai/models) |
@@ -172,6 +172,6 @@ aitdd run
 
 ## Payments
 
-You pay for your own requests to the provider API. AITDD uses `gpt-4o` by default — check [OpenAI pricing](https://openai.com/pricing). For a zero-cost option run a local model with [Ollama](https://ollama.com/) (see Setup above).
+You pay for your own requests to the provider API. AITDD uses `gpt-5.4` by default — check [OpenAI pricing](https://openai.com/pricing). For a zero-cost option run a local model with [Ollama](https://ollama.com/) (see Setup above).
 
 The original project noted that ChatGPT (the web model) could not solve tests reliably. With today's tool-use capable models (GPT-4o, Claude 3.5+, Qwen 3) the results are dramatically better — that limitation no longer applies.
