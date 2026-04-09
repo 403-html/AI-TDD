@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 import { spinner } from "@clack/prompts";
-import { OpenAiApi } from "../../apis/open-ai";
+import { LlmApi } from "../../apis/llm";
 import { FileWithCode } from "../../types";
 import { FUNCTIONS } from "./functions";
 
@@ -22,10 +22,11 @@ class TestSolverAgent {
       {
         role: "system",
         content: [
-          "You are autoregressive language model that has been fine-tuned with instruction-tuning and RLHF, each token you produce is another opportunity to use computation, therefore you always spend a few sentences explaining background context, assumptions, and step-by-step thinking BEFORE you try to respond.",
-          "You are to act as an AI agent that solves tests in REPL mode as per the Test-Driven Development (TDD) practices.",
-          "I send you a test suite code, then you recognize the tech stack and generate production ready code to pass all the tests.",
-          "Adhere strictly to Test-Driven Development (TDD) practices, ensuring that all code written is robust, efficient, and passes the tests.",
+          "You are an AI agent that solves failing tests as per Test-Driven Development (TDD) practices.",
+          "I will send you a test suite and the error output from running it.",
+          "Your job is to write or update source files so that all tests pass.",
+          "Use read_file to inspect existing files before writing. Use write_file to write the complete content of each file you create or modify.",
+          "Adhere strictly to TDD: only write the code needed to pass the tests — no more.",
         ].join("\n"),
       },
       {
@@ -55,12 +56,12 @@ class TestSolverAgent {
     ];
   }
 
-  async callOpenAi({ testFile, relevantFiles, error, context = [] }: Props) {
+  async callLlm({ testFile, relevantFiles, error, context = [] }: Props) {
     const prompt = this.getChatCompletionPrompt(testFile, error, relevantFiles);
 
     const chat = [...prompt, ...context];
 
-    const message = await OpenAiApi.createChatCompletion(chat, [
+    const message = await LlmApi.createChatCompletion(chat, [
       {
         type: "function",
         function: FUNCTIONS.AWK,
@@ -75,7 +76,11 @@ class TestSolverAgent {
       },
       {
         type: "function",
-        function: FUNCTIONS.WRITE_CODE,
+        function: FUNCTIONS.READ_FILE,
+      },
+      {
+        type: "function",
+        function: FUNCTIONS.WRITE_FILE,
       },
     ]);
 
@@ -91,18 +96,18 @@ class TestSolverAgent {
     const loader = spinner();
 
     try {
-      loader.start("GPT is solving the test");
-      const message = await this.callOpenAi({
+      loader.start("AI is solving the test");
+      const message = await this.callLlm({
         testFile,
         relevantFiles,
         error,
         context,
       });
 
-      loader.stop("GPT has an idea, applying 🔧🪛🔨");
+      loader.stop("AI has an idea, applying 🔧🪛🔨");
 
       // TODO: stream to stdout
-      console.info(message.content!);
+      if (message.content) console.info(message.content);
 
       return message;
     } catch (error) {

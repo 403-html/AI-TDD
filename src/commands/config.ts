@@ -10,12 +10,14 @@ import { COMMANDS } from "./enums";
 
 export enum CONFIG_KEYS {
   OPENAI_API_KEY = "OPENAI_API_KEY",
+  ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY",
+  BASE_URL = "BASE_URL",
   MODEL = "MODEL",
   RUN_TESTS = "RUN_TESTS",
   LANGUAGE = "LANGUAGE",
 }
 
-export const DEFAULT_MODEL = "gpt-4-1106-preview";
+export const DEFAULT_MODEL = "gpt-4o";
 export const DEFAULT_MODEL_TOKEN_LIMIT = 100_000;
 
 enum CONFIG_COMMAND_MODES {
@@ -38,12 +40,20 @@ const validateConfig = (
 export const configValidators = {
   [CONFIG_KEYS.OPENAI_API_KEY](value: any, config?: any) {
     validateConfig(CONFIG_KEYS.OPENAI_API_KEY, value, "Cannot be empty");
-    validateConfig(
-      CONFIG_KEYS.OPENAI_API_KEY,
-      value.startsWith("sk-"),
-      'Must start with "sk-"'
-    );
+    return value;
+  },
 
+  [CONFIG_KEYS.ANTHROPIC_API_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.ANTHROPIC_API_KEY, value, "Cannot be empty");
+    return value;
+  },
+
+  [CONFIG_KEYS.BASE_URL](value: any) {
+    validateConfig(
+      CONFIG_KEYS.BASE_URL,
+      typeof value === "string" && value.length > 0,
+      "Must be a non-empty URL string"
+    );
     return value;
   },
 
@@ -70,14 +80,11 @@ export const configValidators = {
   [CONFIG_KEYS.MODEL](value: any) {
     validateConfig(
       CONFIG_KEYS.MODEL,
-      [
-        DEFAULT_MODEL,
-        "gpt-4",
-        "gpt-3.5-turbo",
-        "gpt-3.5-turbo-16k",
-        "gpt-3.5-turbo-0613",
-      ].includes(value),
-      `${value} is not supported yet, 'gpt-4-1106-preview' (default), 'gpt-4', or 'gpt-3.5-turbo'`
+      typeof value === "string" && value.length > 0,
+      "Must be a non-empty model name. " +
+        "OpenAI: gpt-4o (default), gpt-4o-mini, gpt-4.1, gpt-4.1-mini, gpt-5-codex, o3, o4-mini. " +
+        "Anthropic: claude-sonnet-4-6, claude-sonnet-4-5, claude-opus-4-5, claude-haiku-4-5. " +
+        "Ollama/local: qwen3:30b, qwen3:7b, deepseek-coder-v2, codellama (requires BASE_URL)."
     );
 
     return value;
@@ -94,12 +101,16 @@ export const getConfig = (): ConfigType | null => {
   const defaults = {
     [CONFIG_KEYS.RUN_TESTS]: null,
     [CONFIG_KEYS.OPENAI_API_KEY]: null,
+    [CONFIG_KEYS.ANTHROPIC_API_KEY]: null,
+    [CONFIG_KEYS.BASE_URL]: null,
     [CONFIG_KEYS.MODEL]: DEFAULT_MODEL,
     [CONFIG_KEYS.LANGUAGE]: "en",
   };
 
   const configFromEnv = {
     [CONFIG_KEYS.OPENAI_API_KEY]: process.env.OPENAI_API_KEY,
+    [CONFIG_KEYS.ANTHROPIC_API_KEY]: process.env.ANTHROPIC_API_KEY,
+    [CONFIG_KEYS.BASE_URL]: process.env.BASE_URL || null,
     [CONFIG_KEYS.MODEL]: process.env.MODEL || defaults.MODEL,
     [CONFIG_KEYS.LANGUAGE]: process.env.LANGUAGE || defaults.LANGUAGE,
     [CONFIG_KEYS.RUN_TESTS]: process.env.RUN_TESTS || null,

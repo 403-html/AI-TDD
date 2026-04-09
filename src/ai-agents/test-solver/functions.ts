@@ -69,54 +69,40 @@ export const FUNCTIONS = {
     },
   },
 
-  WRITE_CODE: {
-    name: "write_code",
+  READ_FILE: {
+    name: "read_file",
     description:
-      "Modify code at a specified file path according to given instructions",
+      "Read the full contents of a file. Use this to inspect existing code before making changes.",
     parameters: {
       type: "object",
       properties: {
-        modifications: {
-          type: "array",
-          description: "An array of modifications to apply to the code",
-          items: {
-            type: "object",
-            properties: {
-              filePath: {
-                type: "string",
-                description: "The absolute file path relative to the test file",
-              },
-              content: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    row: {
-                      type: "string",
-                      description: "The specific line of code to find",
-                    },
-                    action: {
-                      type: "string",
-                      enum: ["replace", "append", "prepend"],
-                      description: "The action to perform on the 'row'",
-                    },
-                    with: {
-                      type: "string",
-                      description: "The code to insert",
-                    },
-                  },
-                  required: ["row", "action", "with"],
-                },
-                description: "The content modifications to apply",
-              },
-            },
-            required: ["filePath", "content"],
-          },
+        filePath: {
+          type: "string",
+          description: "The relative or absolute path of the file to read",
         },
       },
-      required: ["modifications"],
+      required: ["filePath"],
     },
   },
 
-  // TODO: mb add ls, pwd
+  WRITE_FILE: {
+    name: "write_file",
+    description:
+      "Write the complete contents of a file, creating it if it does not exist. Always provide the entire file — do not use partial snippets.",
+    parameters: {
+      type: "object",
+      properties: {
+        filePath: {
+          type: "string",
+          description: "The relative or absolute path of the file to write",
+        },
+        content: {
+          type: "string",
+          description: "The full source code to write to the file",
+        },
+      },
+      required: ["filePath", "content"],
+    },
+  },
 };
+
