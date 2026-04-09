@@ -205,3 +205,5 @@ The original project noted that ChatGPT (the web model) could not solve tests re
 🔵 **Longer-term / research**
 
 16. Replace flat message context with a plan → act → observe → reflect agentic loop
+17. Expose AI-TDD as an MCP server so Claude Desktop, Cursor, and other MCP-enabled editors can trigger TDD solving directly from the IDE
+18. Run against SWE-bench-lite with different model/provider combos and report pass rates as an ongoing benchmark
